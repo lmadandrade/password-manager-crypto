@@ -1,4 +1,5 @@
 from src.crypto_utils import generate_salt, derive_key, encrypt_password, decrypt_password
+from src.storage import load_vault, save_vault
 
 # Test master password
 master_password = "MyMasterPassword"
@@ -27,3 +28,21 @@ if decrypted == password:
     print("Test successful: encryption and decryption work correctly")
 else:
     print("Test failed")
+
+
+# Test storage
+
+vault = load_vault()
+print("Loaded vault:", vault)
+
+# Add dummy data
+vault["entries"].append({
+    "service": "Test",
+    "username": "test_user",
+    "nonce": "test_nonce",
+    "ciphertext": "test_cipher"
+})
+
+save_vault(vault)
+
+print("Vault updated and saved.")

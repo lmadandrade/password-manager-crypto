@@ -1,13 +1,23 @@
+import json
+import os
+
 # storage.py
 
-# This file handles reading from and writing to the vault file.
+# This file handles reading from and writing to the vault file
+
+VAULT_PATH = "data/vault.json"
 
 
 def load_vault():
     # Load the saved vault data from the JSON file
-    pass
+    if not os.path.exists(VAULT_PATH):
+        return {"version": 1, "salt": None, "entries": []}
+
+    with open(VAULT_PATH, "r") as file:
+        return json.load(file)
 
 
 def save_vault(vault_data):
     # Save the updated vault data to the JSON file
-    pass
+    with open(VAULT_PATH, "w") as file:
+        json.dump(vault_data, file, indent=4)

@@ -1,5 +1,12 @@
 {
-  "version": 1,
-  "salt": null,
-  "entries": []
+    "version": 1,
+    "salt": null,
+    "entries": [
+        {
+            "service": "Test",
+            "username": "test_user",
+            "nonce": "test_nonce",
+            "ciphertext": "test_cipher"
+        }
+    ]
 }
