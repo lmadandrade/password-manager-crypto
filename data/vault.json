@@ -1,5 +1,30 @@
 {
     "version": 1,
-    "salt": null,
-    "entries": []
+    "salt": "Y/ALwxny0bNwLBIATs1/ww==",
+    "entries": [
+        {
+            "service": "Gmail",
+            "username": "lucas@gmail.com",
+            "nonce": "zIzEsJgMdB5yvXNG",
+            "ciphertext": "/O1DSY1iWkv60tLo9v79JOxsEhEoW2o="
+        },
+        {
+            "service": "Netflix",
+            "username": "lucas@netflix2.com",
+            "nonce": "4boiyFrzFkZP2i+O",
+            "ciphertext": "/6ydzgn8iOxsZbnahL8/nkdRzOZV"
+        },
+        {
+            "service": "Amazon",
+            "username": "lucas@amazon.com",
+            "nonce": "n60FYb5nAMKwBfao",
+            "ciphertext": "EbB3YTkZK4paQC5rHqyDtTpewfg="
+        },
+        {
+            "service": "TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest",
+            "username": "test",
+            "nonce": "XR83T/lXuSyj8wlm",
+            "ciphertext": "LwgiCw92pbftUCNbbhxycQzNrzk="
+        }
+    ]
 }
