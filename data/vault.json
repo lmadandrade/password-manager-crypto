@@ -1,12 +1,5 @@
 {
     "version": 1,
-    "salt": "DCfLkLMNFWw9lksm90uvRQ==",
-    "entries": [
-        {
-            "service": "Gmail",
-            "username": "lucas@gmail.com",
-            "nonce": "74ktJQaP5ae+naxC",
-            "ciphertext": "SiUR1E7hckPm3zdev0tvavW5o/vKQ+5dcxEUpoxDovesa/w="
-        }
-    ]
+    "salt": null,
+    "entries": []
 }
