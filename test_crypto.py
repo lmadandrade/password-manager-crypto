@@ -1,5 +1,5 @@
 from src.crypto_utils import generate_salt, derive_key, encrypt_password, decrypt_password
-from src.storage import load_vault, save_vault
+from src.crypto_utils import bytes_to_base64, base64_to_bytes
 
 # Test master password
 master_password = "MyMasterPassword"
@@ -29,20 +29,16 @@ if decrypted == password:
 else:
     print("Test failed")
 
+# Test Base64 conversion
+sample_bytes = b"test_data"
 
-# Test storage
+encoded = bytes_to_base64(sample_bytes)
+decoded = base64_to_bytes(encoded)
 
-vault = load_vault()
-print("Loaded vault:", vault)
+print("Base64 encoded:", encoded)
+print("Base64 decoded:", decoded)
 
-# Add dummy data
-vault["entries"].append({
-    "service": "Test",
-    "username": "test_user",
-    "nonce": "test_nonce",
-    "ciphertext": "test_cipher"
-})
-
-save_vault(vault)
-
-print("Vault updated and saved.")
+if decoded == sample_bytes:
+    print("Base64 test successful")
+else:
+    print("Base64 test failed")

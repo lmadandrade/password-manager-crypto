@@ -1,4 +1,5 @@
 import os #generate secure random values
+import base64 #encoding method (binary into text)
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -39,3 +40,14 @@ def decrypt_password(ciphertext, nonce, key):
     aesgcm = AESGCM(key) 
     plaintext = aesgcm.decrypt(nonce, ciphertext, None) # decrypts process
     return plaintext.decode() # coverts bytes back into normal text
+
+
+#base64
+def bytes_to_base64(data):
+    # Convert bytes into text so they can be stored in JSON
+    return base64.b64encode(data).decode("utf-8")
+
+
+def base64_to_bytes(data):
+    # Convert Base64 text back into bytes
+    return base64.b64decode(data.encode("utf-8"))
