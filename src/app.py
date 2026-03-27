@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 from storage import load_vault, save_vault
 from crypto_utils import (
@@ -23,6 +23,20 @@ def main():
     window.geometry("500x540") # window size
     window.resizable(False, False) # prevent resizing to keep consistency
 
+    # Load eye icons from /assets for password hide/show toggle
+    try:
+        eye_open_img_raw = tk.PhotoImage(file="assets/eye_open.png")
+        eye_closed_img_raw = tk.PhotoImage(file="assets/eye_closed.png")
+
+        # Resize images using subsample
+        eye_open_img = eye_open_img_raw.subsample(18, 18)
+        eye_closed_img = eye_closed_img_raw.subsample(18, 18)
+
+    except Exception:
+        # Fallback in case images are missing or path is incorrect
+        eye_open_img = None
+        eye_closed_img = None
+
     # Track whether passwords are visible or hidden (show/hide toggle)
     show_master_password = False
     show_saved_password = False
@@ -32,40 +46,42 @@ def main():
         nonlocal show_master_password #allows modifying outer variable
         show_master_password = False # reset to hidden state
         master_entry.config(show="*") # hide/mask input with *
-        master_toggle_button.config(text="Show") # reset button text
+        master_toggle_button.config(image=eye_open_img) # reset icon to hidden/default state
 
     # Hide saved password again
     def hide_saved_password():
         nonlocal show_saved_password
         show_saved_password = False
         password_entry.config(show="*") # hide password again
-        password_toggle_button.config(text="Show")
+        password_toggle_button.config(image=eye_open_img) # reset icon to hidden/default state
 
-    # Function to show or hide the master password
+    # Function to show/hide the master password
+    # Uses eye icons instead of text
     def toggle_master_password():
         nonlocal show_master_password
         show_master_password = not show_master_password # switch between true/false
 
-        # if visible -> remove masking
+        # if visible,then remove masking
         if show_master_password:
             master_entry.config(show="") # show the actual text
-            master_toggle_button.config(text="Hide")
+            master_toggle_button.config(image=eye_closed_img)
         else:
-            # if hidden -> mask again
+            # if hidden, then mask again
             master_entry.config(show="*")
-            master_toggle_button.config(text="Show")
+            master_toggle_button.config(image=eye_open_img)
 
-    # Function to show or hide the saved password
+    # Function to show / hide the saved password
+    # Same logic as master password but for the stored password part
     def toggle_saved_password():
         nonlocal show_saved_password
         show_saved_password = not show_saved_password
 
         if show_saved_password:
             password_entry.config(show="") # show password
-            password_toggle_button.config(text="Hide")
+            password_toggle_button.config(image=eye_closed_img)
         else: 
             password_entry.config(show="*") # hide password
-            password_toggle_button.config(text="Show")
+            password_toggle_button.config(image=eye_open_img)
 
 
 
@@ -89,10 +105,54 @@ def main():
         hide_saved_password() # hide password again
 
     # Reset loaded data when service changes
-    # triggered while typing in the service field
+    # Triggered while typing in the service field
     def on_service_change(event=None):
         clear_loaded_data()
         hide_master_password()
+
+
+    # Load saved services into the combobox
+    # Only loads services if the correct master password is provided
+    def refresh_service_list():
+        master_password = master_entry.get()  # get entered master password
+
+        # Prevent loading services without authentication from master password
+        if not master_password:
+            status_label.config(text="Enter master password to load services.", fg="red")
+            return
+
+        vault = load_vault()
+
+        # If no data exists, nothing to load
+        if vault["salt"] is None or not vault["entries"]:
+            service_entry["values"] = []
+            return
+
+        # Recreate key using entered master password
+        salt = base64_to_bytes(vault["salt"])
+        key = derive_key(master_password, salt)
+
+        # Validate master password using first entry
+        try:
+            first_entry = vault["entries"][0]
+            nonce = base64_to_bytes(first_entry["nonce"])
+            ciphertext = base64_to_bytes(first_entry["ciphertext"])
+            decrypt_password(ciphertext, nonce, key)
+        except Exception:
+            status_label.config(text="Wrong master password. Cannot load services.", fg="red") # if decryption fails, password is incorrect
+            return
+
+        # If valid, then load services
+        services = [entry["service"] for entry in vault["entries"]]
+
+        # Remove duplicates and sort
+        unique_services = sorted(set(services), key=str.lower)
+
+        service_entry["values"] = unique_services
+
+        status_label.config(text="Services loaded.", fg="green")
+
+
 
     # Function to save a password
     # This handles the full save flow: get user input -> validate -> prepare encryption -> save safely in the vault
@@ -179,6 +239,7 @@ def main():
             status_label.config(text="Password saved successfully.", fg="green")
 
         save_vault(vault) # save the updated vault
+        refresh_service_list() 
 
         # Clear normal input fields after saving (clears sensitive input on the screen)
         service_entry.delete(0, tk.END)
@@ -276,17 +337,33 @@ def main():
     # entry field for master password with *
     master_entry = tk.Entry(master_frame, show="*", width=25)
     master_entry.pack(side=tk.LEFT)
+    master_entry.bind("<Return>", lambda event: refresh_service_list()) # Load services when user finishes typing master password
+    # Also trigger when focus leaves the master password field
+    master_entry.bind("<FocusOut>", lambda event: refresh_service_list())
 
-    # button to toggle visibility of master password
-    master_toggle_button = tk.Button(master_frame, text="Show", command=toggle_master_password)
+    # Button to toggle hide/show of master password (eye icon instead of text)
+    master_toggle_button = tk.Button(
+        master_frame,
+        image=eye_open_img,
+        command=toggle_master_password,
+        borderwidth=0
+    )
     master_toggle_button.pack(side=tk.LEFT, padx=5)
 
-    # Service name (platform the password belongs to)
+
+    # Service name using a Combobox
     service_label = tk.Label(window, text="Service")
     service_label.pack()
-    service_entry = tk.Entry(window, width=30)
+
+    # Combobox behaves as both input field and dropdown
+    service_entry = ttk.Combobox(window, width=28)
     service_entry.pack(pady=5)
-    service_entry.bind("<KeyRelease>", on_service_change) # bind key release event to detect changes while typing
+
+    # check changes when user types OR selects from dropdown to ensures old loaded data is cleared when typed
+    service_entry.bind("<KeyRelease>", on_service_change)
+    service_entry.bind("<<ComboboxSelected>>", on_service_change)
+
+
 
     # Username (username associated with the service)
     username_label = tk.Label(window, text="Username")
@@ -305,8 +382,13 @@ def main():
     password_entry = tk.Entry(password_frame, show="*", width=25)
     password_entry.pack(side=tk.LEFT)
 
-    # toggle button to show/hide the saved password
-    password_toggle_button = tk.Button(password_frame, text="Show", command=toggle_saved_password)
+    # Button to toggle hide/show saved password (eye icon style as the master password field)
+    password_toggle_button = tk.Button(
+        password_frame,
+        image=eye_open_img,
+        command=toggle_saved_password,
+        borderwidth=0
+    )
     password_toggle_button.pack(side=tk.LEFT, padx=5)
 
     # Save button (triggers encryption + storage process)

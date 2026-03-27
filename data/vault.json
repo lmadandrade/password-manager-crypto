@@ -1,5 +1,12 @@
 {
     "version": 1,
-    "salt": null,
-    "entries": []
+    "salt": "u2qjNV4wqd0d3hTi6PST+w==",
+    "entries": [
+        {
+            "service": "Netflix",
+            "username": "lucas@netflix.com",
+            "nonce": "RdF00Prfd0Z1V6sl",
+            "ciphertext": "HeEsUN9hXo6oKzTz2eckgo7ItAc="
+        }
+    ]
 }
