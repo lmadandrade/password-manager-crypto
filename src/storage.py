@@ -21,3 +21,16 @@ def save_vault(vault_data):
     # Save the updated vault data to the JSON file
     with open(VAULT_PATH, "w") as file:
         json.dump(vault_data, file, indent=4)
+
+
+def reset_vault():
+    # Reset the vault back to the empty starting state
+    empty_vault = {
+        "version": 1,
+        "salt": None,
+        "entries": []
+    }
+
+    # Save the empty vault into the JSON file
+    with open(VAULT_PATH, "w") as file:
+        json.dump(empty_vault, file, indent=4)
