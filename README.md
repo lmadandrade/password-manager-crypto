@@ -18,9 +18,9 @@ This is a learning-focused implementation and is not intended for production use
 ## Development Plan
 
 - [x] Project structure created
-- [ ] Implement key derivation (PBKDF2)
-- [ ] Implement AES encryption/decryption
-- [ ] Implement vault loading and saving
-- [ ] Build Tkinter GUI layout
-- [ ] Connect GUI to encryption logic
-- [ ] Add basic validation and error handling
+- [x] Implement key derivation (PBKDF2)
+- [x] Implement AES encryption/decryption
+- [x] Implement vault loading and saving
+- [x] Build Tkinter GUI layout
+- [x] Connect GUI to encryption logic
+- [x] Add basic validation and error handling
